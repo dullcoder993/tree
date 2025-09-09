@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BST & Graph Visualizer with Dark Mode</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+    color: #333;
+    transition: background 0.5s, color 0.5s;
+  }
+
+  /* Dark mode styles */
+  body.dark-mode {
+    background: linear-gradient(135deg, #232526, #1c1c1c);
+    color: #f0f0f0;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  /* Container for all sections */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Style for sections */
+  section {
+    background: rgba(255,255,255,0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    padding: 20px;
+    transition: background 0.3s;
+  }
+
+  /* Dark mode for sections */
+  body.dark-mode section {
+    background: rgba(34, 34, 34, 0.9);
+  }
+
+  h2 {
+    margin-top: 0;
+    color: #34495e;
+  }
+
+  body.dark-mode h2 {
+    color: #ecf0f1;
+  }
+
+  /* Buttons with gradient and hover effects */
+  .btn {
+    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    color: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* Inputs */
+  input[type=number], input[type=text] {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+  }
+
+  /* Outputs */
+  #bst-output, #graph-output {
+    margin-top: 10px;
+    font-weight: 600;
+  }
+
+  /* Canvases for visualization */
+  canvas {
+    display: block;
+    margin: 20px auto;
+    background-color: #fff; /* will be overridden in dark mode if needed */
+    border-radius: 12px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    transition: background 0.5s, box-shadow 0.5s;
+  }
+
+  /* Dark mode for canvases */
+  body.dark-mode canvas {
+    background-color: #222;
+  }
+
+  /* Algorithm cards */
+  .card {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+    color: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  body.dark-mode .card {
+    background: linear-gradient(135deg, #444, #222);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  }
+
+  /* Dark mode toggle button */
+  #darkModeToggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    color: #fff;
+    transition: all 0.3s ease;
+  }
+
+  #darkModeToggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* Responsive adjustments */
+  @media(max-width: 768px){
+    body {
+      padding: 10px;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Dark Mode Toggle Button -->
+<button id="darkModeToggle" onclick="toggleDarkMode()">Dark Mode</button>
+
+<div class="container">
+<h1>BST & Graph Visualizer</h1>
+
+<!-- Algorithm Info Cards -->
+<div class="card">
+  <h3>Binary Search Tree (BST) Operations</h3>
+  <ul>
+    <li><strong>Insert:</strong> Adds a new node maintaining BST properties.</li>
+    <li><strong>Delete:</strong> Removes a node, restructuring as needed.</li>
+    <li><strong>Traversals:</strong> Preorder, Inorder, Postorder for visiting nodes.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Graph Traversals</h3>
+  <ul>
+    <li><strong>BFS:</strong> Breadth-First Search, explores neighbors level by level.</li>
+    <li><strong>DFS:</strong> Depth-First Search, explores as deep as possible along a branch.</li>
+  </ul>
+</div>
+
+<!-- BST Section -->
+<section id="bst-section">
+  <h2>Binary Search Tree</h2>
+  <div class="concept">
+    <strong>BST Concept:</strong> A binary tree where left children are smaller, right children are larger.
+  </div>
+  <div class="concept">
+    <strong>Operations:</strong> Insert, Search, Delete, Traversals.
+  </div>
+  <div style="margin-top:10px;">
+    <input type="number" id="bst-input" placeholder="Enter value" />
+    <button class="btn" onclick="insertBST()">Insert</button>
+    <button class="btn" onclick="deleteBST()">Delete</button>
+  </div>
+  <div>
+    <button class="btn" onclick="traverseBST('preorder')">Preorder</button>
+    <button class="btn" onclick="traverseBST('inorder')">Inorder</button>
+    <button class="btn" onclick="traverseBST('postorder')">Postorder</button>
+  </div>
+  <div id="bst-output"></div>
+  <canvas id="bst-canvas" width="850" height="550"></canvas>
+</section>
+<section id="theory-section">
+  <h2>Theory & Applications</h2>
+  
+  <div class="card" style="background: linear-gradient(135deg, #6a11cb, #2575fc); color: #fff;">
+    <h3>Binary Search Tree (BST)</h3>
+    <p>
+      <strong>Time Complexities:</strong><br>
+      - Search: O(log n) on average, O(n) in the worst case (skewed tree)<br>
+      - Insert/Delete: O(log n) on average, O(n) worst case<br>
+    </p>
+    <p>
+      <strong>Real-Life Applications:</strong><br>
+      - Database indexing<br>
+      - Autocomplete features<br>
+      - Maintaining sorted data dynamically<br>
+    </p>
+  </div>
+  
+  <div class="card" style="background: linear-gradient(135deg, #f39c12, #f1c40f); color: #fff;">
+    <h3>Graphs</h3>
+    <p>
+      <strong>Time Complexities:</strong><br>
+      - BFS/DFS: O(V + E) where V is vertices and E is edges<br>
+      - Shortest path algorithms like Dijkstra: O((V + E) log V)<br>
+    </p>
+    <p>
+      <strong>Real-Life Applications:</strong><br>
+      - Social networks (finding connections)<br>
+      - Routing and navigation (GPS systems)<br>
+      - Network broadcasting and communication<br>
+      - Dependency analysis in project management<br>
+    </p>
+  </div>
+</section>
+
+<!-- Graph Section -->
+<section id="graph-section">
+  <h2>Graph Traversal</h2>
+  <div class="concept">
+    <strong>Graph Concept:</strong> Nodes connected by edges, explored via BFS and DFS.
+  </div>
+  <div style="margin-top:10px;">
+    <button class="btn" onclick="bfs()">BFS</button>
+    <button class="btn" onclick="dfs()">DFS</button>
+  </div>
+  <div id="graph-output"></div>
+  <canvas id="graph-canvas" width="850" height="550"></canvas>
+</section>
+</div>
+
+<script>
+// =================== Dark Mode Toggle ===================
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const btn = document.getElementById('darkModeToggle');
+  if (document.body.classList.contains('dark-mode')) {
+    btn.innerText = 'Light Mode';
+  } else {
+    btn.innerText = 'Dark Mode';
+  }
+}
+
+// =================== BST Implementation ===================
+
+class Node {
+  constructor(val) {
+    this.val = val;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+let bstRoot = null;
+
+// Insert Node with animation
+function insertBST() {
+  const val = parseInt(document.getElementById('bst-input').value);
+  if (isNaN(val)) {
+    alert('Please enter a valid number');
+    return;
+  }
+  bstRoot = insertNode(bstRoot, val);
+  document.getElementById('bst-input').value = '';
+  animateBST();
+}
+
+// Standard insert helper
+function insertNode(root, val) {
+  if (!root) return new Node(val);
+  if (val < root.val) root.left = insertNode(root.left, val);
+  else if (val > root.val) root.right = insertNode(root.right, val);
+  return root;
+}
+
+// Delete Node with animation
+function deleteBST() {
+  const val = parseInt(document.getElementById('bst-input').value);
+  if (isNaN(val)) {
+    alert('Please enter a valid number to delete');
+    return;
+  }
+  bstRoot = deleteNode(bstRoot, val);
+  document.getElementById('bst-input').value = '';
+  animateBST();
+}
+
+// Helper delete
+function deleteNode(root, val) {
+  if (!root) return null;
+  if (val < root.val) root.left = deleteNode(root.left, val);
+  else if (val > root.val) root.right = deleteNode(root.right, val);
+  else {
+    // Node found
+    if (!root.left) return root.right;
+    if (!root.right) return root.left;
+    // Two children
+    let minNode = findMin(root.right);
+    root.val = minNode.val;
+    root.right = deleteNode(root.right, minNode.val);
+  }
+  return root;
+}
+
+function findMin(node) {
+  while (node.left) node = node.left;
+  return node;
+}
+
+// Traversal
+function traverseBST(order) {
+  const result = [];
+  if (order === 'preorder') preorder(bstRoot, result);
+  else if (order === 'inorder') inorder(bstRoot, result);
+  else if (order === 'postorder') postorder(bstRoot, result);
+  document.getElementById('bst-output').innerText = 'Order: ' + result.join(', ');
+}
+
+// Traversal functions
+function preorder(node, result) {
+  if (node) {
+    result.push(node.val);
+    preorder(node.left, result);
+    preorder(node.right, result);
+  }
+}
+function inorder(node, result) {
+  if (node) {
+    inorder(node.left, result);
+    result.push(node.val);
+    inorder(node.right, result);
+  }
+}
+function postorder(node, result) {
+  if (node) {
+    postorder(node.left, result);
+    postorder(node.right, result);
+    result.push(node.val);
+  }
+}
+
+// Canvas for BST
+const ctxBST = document.getElementById('bst-canvas').getContext('2d');
+
+function animateBST() {
+  ctxBST.clearRect(0, 0, 850, 550);
+  if (!bstRoot) return;
+
+  const positions = {};
+  const levelHeight = 80;
+  function assignPositions(node, depth, xMin, xMax) {
+    if (!node) return;
+    const x = (xMin + xMax) / 2;
+    const y = depth * levelHeight + 50;
+    positions[node.val] = { x, y, node, color: '#2980b9' };
+    assignPositions(node.left, depth + 1, xMin, x);
+    assignPositions(node.right, depth + 1, x, xMax);
+  }
+  assignPositions(bstRoot, 0, 50, 800);
+
+  // Animate drawing with delay
+  let drawIndex = 0;
+  const allNodes = Object.keys(positions);
+  function drawNext() {
+    if (drawIndex >= allNodes.length) return;
+    ctxBST.clearRect(0, 0, 850, 550);
+    // Draw connections
+    ctxBST.lineWidth = 2;
+    ctxBST.strokeStyle = '#2980b9';
+
+    allNodes.forEach((val, index) => {
+      const pos = positions[val];
+      if (pos.node.left) {
+        const left = positions[pos.node.left.val];
+        ctxBST.beginPath();
+        ctxBST.moveTo(pos.x, pos.y);
+        ctxBST.lineTo(left.x, left.y);
+        ctxBST.stroke();
+      }
+      if (pos.node.right) {
+        const right = positions[pos.node.right.val];
+        ctxBST.beginPath();
+        ctxBST.moveTo(pos.x, pos.y);
+        ctxBST.lineTo(right.x, right.y);
+        ctxBST.stroke();
+      }
+    });
+
+    // Draw nodes with animation
+    const val = allNodes[drawIndex];
+    const p = positions[val];
+    p.color = '#e74c3c'; // highlight current node
+    allNodes.forEach((v, i) => {
+      const pos = positions[v];
+      ctxBST.globalAlpha = i === drawIndex ? 1 : 0.3;
+      ctxBST.beginPath();
+      ctxBST.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
+      ctxBST.fillStyle = '#fff';
+      ctxBST.fill();
+      ctxBST.strokeStyle = '#2980b9';
+      ctxBST.stroke();
+      ctxBST.fillStyle = '#2c3e50';
+      ctxBST.font = '14px Roboto';
+      ctxBST.textAlign = 'center';
+      ctxBST.textBaseline = 'middle';
+      ctxBST.fillText(v, pos.x, pos.y);
+    });
+    ctxBST.globalAlpha = 1;
+    drawIndex++;
+    setTimeout(drawNext, 400);
+  }
+  drawNext();
+}
+
+// =================== Graph Implementation ===================
+
+const graph = {
+  A: ['B', 'C'],
+  B: ['A', 'D', 'E'],
+  C: ['A', 'F'],
+  D: ['B'],
+  E: ['B', 'F'],
+  F: ['C', 'E']
+};
+
+const graphPositions = {};
+
+function initGraphPositions() {
+  const nodes = Object.keys(graph);
+  const centerX = 425;
+  const centerY = 275;
+  const radius = 180;
+  nodes.forEach((node, index) => {
+    const angle = (index / nodes.length) * Math.PI * 2;
+    graphPositions[node] = {
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle)
+    };
+  });
+}
+
+function animateGraphTraversal(order) {
+  const ctx = document.getElementById('graph-canvas').getContext('2d');
+  ctx.clearRect(0, 0, 850, 550);
+  initGraphPositions();
+
+  // Draw edges
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#999';
+
+  for (const node in graph) {
+    const fromPos = graphPositions[node];
+    for (const neighbor of graph[node]) {
+      if (node < neighbor) { // avoid duplicates
+        const toPos = graphPositions[neighbor];
+        ctx.beginPath();
+        ctx.moveTo(fromPos.x, fromPos.y);
+        ctx.lineTo(toPos.x, toPos.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Animate nodes in traversal order
+  order.forEach((node, index) => {
+    setTimeout(() => {
+      highlightGraphNode(node, index);
+    }, index * 600);
+  });
+}
+
+function highlightGraphNode(node, index) {
+  const ctx = document.getElementById('graph-canvas').getContext('2d');
+  ctx.clearRect(0, 0, 850, 550);
+  initGraphPositions();
+
+  // Redraw edges
+  for (const n in graph) {
+    const from = graphPositions[n];
+    for (const neighbor of graph[n]) {
+      if (n < neighbor) {
+        const to = graphPositions[neighbor];
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw nodes with highlight
+  for (const n in graph) {
+    const pos = graphPositions[n];
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 15, 0, Math.PI * 2);
+    ctx.fillStyle = n === node ? `rgba(231, 76, 60, 0.8)` : `rgba(52, 152, 219, 0.6)`;
+    ctx.fill();
+    ctx.strokeStyle = '#2c3e50';
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px Roboto';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(n, pos.x, pos.y);
+  }
+}
+
+// BFS with animation
+function bfs() {
+  const startNode = 'A';
+  const visited = new Set();
+  const queue = [startNode];
+  const order = [];
+  while (queue.length > 0) {
+    const node = queue.shift();
+    if (!visited.has(node)) {
+      visited.add(node);
+      order.push(node);
+      queue.push(...graph[node].filter(n => !visited.has(n)));
+    }
+  }
+  document.getElementById('graph-output').innerText = 'BFS Order: ' + order.join(' -> ');
+  animateGraphTraversal(order);
+}
+
+// DFS with animation
+function dfs() {
+  const startNode = 'A';
+  const visited = new Set();
+  const order = [];
+  function dfsVisit(node) {
+    if (!node || visited.has(node)) return;
+    visited.add(node);
+    order.push(node);
+    for (const neighbor of graph[node]) {
+      dfsVisit(neighbor);
+    }
+  }
+  dfsVisit(startNode);
+  document.getElementById('graph-output').innerText = 'DFS Order: ' + order.join(' -> ');
+  animateGraphTraversal(order);
+}
+
+// Initialize graph node positions
+initGraphPositions();
+
+</script>
+</body>
+</html>
